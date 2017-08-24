@@ -53,10 +53,19 @@
         console.log('login')
         if (response.authResponse) {
           localStorage.setItem('fbaccesstoken', response.authResponse.accessToken)
+          axios.get('http://localhost:3000/facebook/login', {
+            headers:{
+              fbtoken: response.authResponse.accessToken
+            }
+          })
+          .then(responded => {
+            // console.log(responded.data)
+            localStorage.setItem('usertoken', responded.data.jwttoken)
+          })
         } else {
           console.log('User cancelled login or did not fully authorize.');
         }
-      }, {scope: 'public_profile,email,publish_actions,user_posts'});
+      }, {scope: 'public_profile,email,publish_actions,user_posts,user_photos'});
     }
 
     function FBLogout () {
@@ -64,7 +73,8 @@
         if (response) {
           console.log('logout response', response)
           localStorage.removeItem('fbaccesstoken')
-          // window.location.reload()
+          localStorage.removeItem('usertoken')
+          window.location.reload()
         } else {
           console.log('something wrong')
         }
