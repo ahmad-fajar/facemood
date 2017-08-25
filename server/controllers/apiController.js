@@ -42,23 +42,16 @@ module.exports = {
       let $ = cheerio.load(result.data)
       let quotes = $('.b-qt')
       let tmp = []
-      // console.log(quotes);
-      // console.log(quotes[0].next.next);
+
       for(let i = 0; i < quotes.length; i++) {
         tmp.push({
           quotes: quotes[i].children[0].data,
           author: quotes[i].next.next.children[0].data
         })
-        // console.log('a', quotes[i].children[0].next)
       }
-      console.log(tmp);
 
-      // let text = quotes.map(quote => {
-      //   // console.log(quote);
-      //   return quote.children('.b-qt').html()
-      // })
-      // console.log(quotes);
-      res.send(text)
+      let randIndex = Math.floor(Math.random()*tmp.length)
+      res.send(tmp[randIndex])
     })
     .catch(err => {
       res.send(err)
