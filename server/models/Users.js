@@ -3,10 +3,6 @@ const mongoose = require('mongoose');
 const Schema   = mongoose.Schema;
 
 const UsersSchema = mongoose.Schema({
-  'name'     : {
-    type     : String,
-    required : true
-  },
   'username' : {
     type     : String,
     required : true
@@ -15,7 +11,7 @@ const UsersSchema = mongoose.Schema({
     type     : String,
     required : true
   },
-  'fb_token' : {
+  'fbtoken' : {
     type     : String,
     required : true
   }
