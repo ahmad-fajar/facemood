@@ -1,0 +1,113 @@
+* {
+  font-family: 'Base';
+  color: #fff
+}
+
+html, body {
+  height: 100%
+}
+
+html body, body body {
+  min-height: 100%;
+  overflow: hidden;
+  background: #0096ff;
+  font-size: 16px
+}
+
+#wrap {
+  position: absolute;
+  display: block;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  text-align: center;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  -webkit-transform-origin: 50% 50%;
+  -ms-transform-origin: 50% 50%;
+  transform-origin: 50% 50%
+}
+
+#content {
+  position: relative;
+  max-width: 210px;
+  margin: auto
+}
+
+h2 {
+  font-weight: 100
+}
+
+form {
+  margin-top: -50%;
+  opacity: 0;
+  position: absolute;
+  overflow: hidden;
+  -webkit-transition: all 0.8s ease-out;
+  -moz-transition: all 0.8s ease-out;
+  transition: all 0.8s ease-out;
+  left: 100%
+}
+
+form.active {
+  opacity: 1;
+  left: 0px
+}
+
+input {
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 15px;
+  border: none;
+  padding: 5px 3px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box
+}
+
+input[type='text'], form input[type='password'], form input[type='email'] {
+  background-color: transparent;
+  border-bottom: solid 1px #fff;
+  color: white
+}
+
+input[type='submit'] {
+  background-color: #fff;
+  color: #0096ff;
+  cursor: pointer
+}
+
+::-webkit-input-placeholder {
+  color: #fff;
+  opacity: .66;
+  text-transform: capitalize
+}
+
+:-moz-placeholder {
+  color: #fff;
+  opacity: .66;
+  text-transform: capitalize
+}
+
+::-moz-placeholder {
+  color: #fff;
+  opacity: .66;
+  text-transform: capitalize
+}
+
+:-ms-input-placeholder {
+  color: #fff;
+  opacity: .66;
+  text-transform: capitalize
+}
+
+a {
+  color: white;
+  font-size: 15px;
+  text-decoration: none
+}
+
+a:hover {
+  text-decoration: underline
+}
