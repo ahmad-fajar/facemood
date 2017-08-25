@@ -3,24 +3,27 @@ require('dotenv').config()
 const axios = require('axios')
 const cheerio = require('cheerio')
 const jwt = require('jsonwebtoken')
+const multer = require('multer')
+const path = require('path')
 
 const Users = require('../models/Users')
 const Quotes = require('../models/Quotes')
 
+
 module.exports = {
   getExpression: (req, res) => {
-    axios({
-      method: 'post',
-      url: 'https://westus.api.cognitive.microsoft.com/emotion/v1.0/recognize',
-      headers: {
-        'Content-Type': 'application/json',
-        'Ocp-Apim-Subscription-Key': process.env.AZURE_SUBS_KEY
-      },
-      data: `{url: '${req.query.url}'}`,
-      responseType:'json'
-    })
-    .then(result => {
-      let scores = result.data[0].scores
+    // axios({
+    //   method: 'post',
+    //   url: 'https://westus.api.cognitive.microsoft.com/emotion/v1.0/recognize',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Ocp-Apim-Subscription-Key': process.env.AZURE_SUBS_KEY
+    //   },
+    //   data: `{url: '${req.query.url}'}`,
+    //   responseType:'json'
+    // })
+    // .then(result => {
+      let scores = req.body.scores
       let keys = Object.keys(scores)
 
       let mood = keys.reduce((a, b) => {return scores[a] > scores[b] ? a : b})
@@ -41,10 +44,10 @@ module.exports = {
         mood: mood,
         collectionId: collectionId
       })
-    })
-    .catch(err => {
-      res.send(err)
-    })
+    // })
+    // .catch(err => {
+    //   res.send(err)
+    // })
   },
 
   getQuotes: (req, res) => {
@@ -88,21 +91,23 @@ module.exports = {
 
   getResult: (req, res) => {
     // console.log('req', req.query.url);
+    // const host = 'https://face-mood.herokuapp.com'
     const host = 'http://localhost:3000'
     let token = req.headers.usertoken
-    let mood = ''
     let fbid = ''
     jwt.verify(token, 'Facemood', (e, decrypt) => {
       console.log(decrypt.fbid)
       fbid = decrypt.fbid
     })
-    // console.log(fbid)
-    axios.get(`${host}/api/expression?url=${req.query.url}`)
+    
+    axios.post(`${host}/api/expression`, req.body)
     .then(({data}) => {
-      mood = data.mood
       return Promise.all([
         axios.get(`${host}/api/images/${data.collectionId}`),
-        axios.get(`${host}/api/quotes/${data.mood}`)
+        axios.get(`${host}/api/quotes/${data.mood}`),
+        new Promise((resolve, reject) => {
+          resolve(data.mood)
+        })
       ])
     })
     .then(result => {
@@ -111,7 +116,7 @@ module.exports = {
         url   : result[0].data.url,
         quotes: result[1].data.quotes,
         author: result[1].data.author,
-        mood  : mood
+        mood: result[2]
       }
 
       Quotes.create(queryResult)
@@ -130,7 +135,7 @@ module.exports = {
           .then(pushed => console.log(pushed))
         })
         .catch(e => console.log(e))
-
+        
       })
 
 
@@ -141,6 +146,7 @@ module.exports = {
     })
   },
 
+
   getFeed: (req, res) => {
     Users.find()
     .populate('quoteslist')
@@ -148,4 +154,5 @@ module.exports = {
     .then(feeds => res.send(feeds))
     .catch(e => console.log(e))
   }
+  
 }
