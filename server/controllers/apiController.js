@@ -4,6 +4,8 @@ const axios = require('axios')
 const cheerio = require('cheerio')
 const path = require('path')
 const multer  =   require('multer');
+// const host = 'https://face-mood.herokuapp.com'
+const host = 'http://localhost:3000'
 
 module.exports = {
   getExpression: (req, res) => {
@@ -87,7 +89,7 @@ module.exports = {
   getResult: (req, res) => {
     // console.log('req', req.query.url);
     // const host = 'https://face-mood.herokuapp.com'
-    const host = 'http://localhost:3000'
+    // const host = 'http://localhost:3000'
     // console.log(req.body);
     axios.post(`${host}/api/expression`, req.body)
     .then(({data}) => {
@@ -130,8 +132,7 @@ module.exports = {
         // return res.send(err);
         console.log(err);
       }
-      // const host = 'https://face-mood.herokuapp.com'
-      const host = 'http://localhost:3000'
+
       console.log(req.file.path);
       axios.get(`${host}/api/get-result?url=${req.file.path}`)
       .then(({data}) => {
