@@ -1,39 +1,31 @@
 'use strict'
 require('dotenv').config()
 const axios = require('axios')
-const ajax = require('ajax-request')
 const cheerio = require('cheerio')
 
 module.exports = {
   getExpression: (req, res) => {
-    // axios({
-    //   method: 'post',
-    //   url: 'https://westus.api.cognitive.microsoft.com/emotion/v1.0/recognize',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Ocp-Apim-Subscription-Key': process.env.AZURE_SUBS_KEY
-    //   },
-    //   data: `{url: ${req.body.url}}`
-    // })
-    // .then(result => res.send(result.data))
-    // .catch(err => {
-    //   if (err instanceof Error) {
-    //     res.send(err)
-    //   } else {
-    //     console.log('it worked!');
-    //   }
-    // })
-    ajax.post({
+    axios({
+      method: 'post',
       url: 'https://westus.api.cognitive.microsoft.com/emotion/v1.0/recognize',
-      data: `{url: ${req.body.url}}`,
       headers: {
         'Content-Type': 'application/json',
         'Ocp-Apim-Subscription-Key': process.env.AZURE_SUBS_KEY
-      }
-    }, (err, result, body) => {
-      if (err) res.send(err)
-      else res.send(body)
-    });
+      },
+      data: `{url: '${req.body.url}'}`,
+      responseType:'json'
+    })
+    .then(result => {
+      let scores = result.data[0].scores
+      let keys = Object.keys(scores)
+
+      let mood = keys.reduce((a, b) => {return scores[a] > scores[b] ? a : b})
+
+      res.send({mood: mood})
+    })
+    .catch(err => {
+      res.send(err)
+    })
   },
 
   getQuotes: (req, res) => {
