@@ -12,7 +12,7 @@ module.exports = {
         'Content-Type': 'application/json',
         'Ocp-Apim-Subscription-Key': process.env.AZURE_SUBS_KEY
       },
-      data: `{url: '${req.body.url}'}`,
+      data: `{url: '${req.query.url}'}`,
       responseType:'json'
     })
     .then(result => {
@@ -75,6 +75,28 @@ module.exports = {
       let image = images[randIndex]
       res.send({
         url: image.urls.regular
+      })
+    })
+    .catch(err => {
+      res.send(err)
+    })
+  },
+
+  getResult: (req, res) => {
+    // console.log('req', req.query.url);
+    const host = 'http://localhost:3000'
+    axios.get(`${host}/api/expression?url=${req.query.url}`)
+    .then(({data}) => {
+      return Promise.all([
+        axios.get(`${host}/api/images/${data.collectionId}`),
+        axios.get(`${host}/api/quotes/${data.mood}`)
+      ])
+    })
+    .then(result => {
+      res.send({
+        url: result[0].data.url,
+        quotes: result[1].data.quotes,
+        author: result[1].data.author
       })
     })
     .catch(err => {
