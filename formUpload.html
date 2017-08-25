@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+  <head>
+        <!-- Latest compiled and minified CSS -->
+    <style>
+          /* layout.css Style */
+      .upload-drop-zone {
+        height: 200px;
+        border-width: 2px;
+        margin-bottom: 20px;
+      }
+
+      /* skin.css Style*/
+      .upload-drop-zone {
+        color: #ccc;
+        border-style: dashed;
+        border-color: #ccc;
+        line-height: 200px;
+        text-align: center
+      }
+      .upload-drop-zone.drop {
+        color: #222;
+        border-color: #222;
+      }
+
+      .image-preview-input {
+          position: relative;
+          overflow: hidden;
+          margin: 0px;
+          color: #333;
+          background-color: #fff;
+          border-color: #ccc;
+      }
+      .image-preview-input input[type=file] {
+      	position: absolute;
+      	top: 0;
+      	right: 0;
+      	margin: 0;
+      	padding: 0;
+      	font-size: 20px;
+      	cursor: pointer;
+      	opacity: 0;
+      	filter: alpha(opacity=0);
+      }
+      .image-preview-input-title {
+          margin-left:2px;
+      }
+    </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script
+ src="https://code.jquery.com/jquery-3.2.1.min.js"
+ integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+ crossorigin="anonymous"></script>
+   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <div class="container"> <br />
+    <div class="row">
+
+    	<div class="col-md-7">
+			<div class="panel panel-default">
+				<div class="panel-heading"><strong>Upload files</strong> <small> </small></div>
+				<div class="panel-body">
+					     <div class="input-group image-preview">
+						<input placeholder="" type="text" class="form-control image-preview-filename" disabled="disabled">
+						<!-- don't give a name === doesn't send on POST/GET -->
+						<span class="input-group-btn">
+						<!-- image-preview-clear button -->
+						<button type="button" class="btn btn-default image-preview-clear" style="display:none;"> <span class="glyphicon glyphicon-remove"></span> Clear </button>
+						<!-- image-preview-input -->
+						<div class="btn btn-default image-preview-input"> <span class="glyphicon glyphicon-folder-open"></span> <span class="image-preview-input-title">Browse</span>
+							<input id="userPhoto" type="file" accept="image/png, image/jpeg, image/gif" name="userPhoto"/>
+							<!-- rename it -->
+						</div>
+						<button type="button" class="btn btn-labeled btn-default"> <span class="btn-label"><i class="glyphicon glyphicon-upload"></i> </span>Upload</button>
+						</span> </div>
+					<!-- /input-group image-preview [TO HERE]-->
+
+					<br />
+
+					<!-- Drop Zone -->
+					<div class="upload-drop-zone" id="drop-zone"> Or drag and drop files here </div>
+					<br />
+					<!-- Progress Bar -->
+					<div class="progress">
+						<div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;"> <span class="sr-only">60% Complete</span> </div>
+					</div>
+					<br />
+					<!-- Upload Finished -->
+					<!-- <div class="js-upload-finished">
+						<h4>Upload history</h4>
+						<div class="list-group"> <a href="#" class="list-group-item list-group-item-danger"><span class="badge alert-danger pull-right">23-11-2014</span>amended-catalogue-01.xls</a> <a href="#" class="list-group-item list-group-item-success"><span class="badge alert-success pull-right">23-11-2014</span>amended-catalogue-01.xls</a> <a href="#" class="list-group-item list-group-item-success"><span class="badge alert-success pull-right">23-11-2014</span>amended-catalogue-01.xls</a> <a href="#" class="list-group-item list-group-item-success"><span class="badge alert-success pull-right">23-11-2014</span>amended-catalogue.xls</a> </div>
+					</div> -->
+				</div>
+			</div>
+		  </div>
+    </div>
+    </div>
+<!-- /container -->
+  <script>
+    function() {
+    'use strict';
+
+    // UPLOAD CLASS DEFINITION
+    // ======================
+
+    var dropZone = document.getElementById('drop-zone');
+    var uploadForm = document.getElementById('js-upload-form');
+
+    var startUpload = function(files) {
+
+        console.log(files)
+        var url = 'https://westus.api.cognitive.microsoft.com/emotion/v1.0/recognize'
+        console.log(url);
+        /* Send the data using post with element id name and name2*/
+        // var posting = $.post(url, {userPhoto: $('#userPhoto')[0].files[0] } );
+        // console.log(posting);
+        var data = new FormData();
+        data.append('userPhoto', $('#userPhoto')[0].files[0])
+        axios({
+          method: 'post',
+          url: url,
+        	// data: data,
+          data: $('#userPhoto')[0].files[0],
+        	headers: {
+            'Content-Type': 'application/octet-stream',
+            'Ocp-Apim-Subscription-Key': 'fbeb52204b954c7f9499018c6ba4d870'
+          },
+          processData: false
+        })
+        .then(({data}) => {
+          console.log(data[0]);
+          return axios.post('http://face-mood.herokuapp.com/api/get-result', data[0])
+        })
+        .then(({data}) => {
+          console.log(data);
+        })
+    }
+
+    uploadForm.addEventListener('submit', function(e) {
+        var uploadFiles = document.getElementById('js-upload-files').files;
+        e.preventDefault()
+
+        startUpload(uploadFiles)
+    })
+
+    dropZone.ondrop = function(e) {
+        e.preventDefault();
+        this.className = 'upload-drop-zone';
+
+        startUpload(e.dataTransfer.files)
+    }
+
+    dropZone.ondragover = function() {
+        this.className = 'upload-drop-zone drop';
+        return false;
+    }
+
+    dropZone.ondragleave = function() {
+        this.className = 'upload-drop-zone';
+        return false;
+    }
+
+  }();
+  </script>
+
+  </body>
+</html>
