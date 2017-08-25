@@ -2,21 +2,23 @@
 require('dotenv').config()
 const axios = require('axios')
 const cheerio = require('cheerio')
+const path = require('path')
+const multer  =   require('multer');
 
 module.exports = {
   getExpression: (req, res) => {
-    axios({
-      method: 'post',
-      url: 'https://westus.api.cognitive.microsoft.com/emotion/v1.0/recognize',
-      headers: {
-        'Content-Type': 'application/json',
-        'Ocp-Apim-Subscription-Key': process.env.AZURE_SUBS_KEY
-      },
-      data: `{url: '${req.query.url}'}`,
-      responseType:'json'
-    })
-    .then(result => {
-      let scores = result.data[0].scores
+    // axios({
+    //   method: 'post',
+    //   url: 'https://westus.api.cognitive.microsoft.com/emotion/v1.0/recognize',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Ocp-Apim-Subscription-Key': process.env.AZURE_SUBS_KEY
+    //   },
+    //   data: `{url: '${req.query.url}'}`,
+    //   responseType:'json'
+    // })
+    // .then(result => {
+      let scores = req.body.scores
       let keys = Object.keys(scores)
 
       let mood = keys.reduce((a, b) => {return scores[a] > scores[b] ? a : b})
@@ -37,10 +39,10 @@ module.exports = {
         mood: mood,
         collectionId: collectionId
       })
-    })
-    .catch(err => {
-      res.send(err)
-    })
+    // })
+    // .catch(err => {
+    //   res.send(err)
+    // })
   },
 
   getQuotes: (req, res) => {
@@ -84,23 +86,60 @@ module.exports = {
 
   getResult: (req, res) => {
     // console.log('req', req.query.url);
+    // const host = 'https://face-mood.herokuapp.com'
     const host = 'http://localhost:3000'
-    axios.get(`${host}/api/expression?url=${req.query.url}`)
+    // console.log(req.body);
+    axios.post(`${host}/api/expression`, req.body)
     .then(({data}) => {
       return Promise.all([
         axios.get(`${host}/api/images/${data.collectionId}`),
-        axios.get(`${host}/api/quotes/${data.mood}`)
+        axios.get(`${host}/api/quotes/${data.mood}`),
+        new Promise((resolve, reject) => {
+          resolve(data.mood)
+        })
       ])
     })
     .then(result => {
       res.send({
         url: result[0].data.url,
         quotes: result[1].data.quotes,
-        author: result[1].data.author
+        author: result[1].data.author,
+        mood: result[2]
       })
     })
     .catch(err => {
       res.send(err)
     })
+  },
+
+  upload: (req, res) => {
+    // console.log('test');
+    var uploadPath = path.join(__dirname, '../images/')
+    var storage =   multer.diskStorage({
+      destination: function (req, file, callback) {
+        callback(null, uploadPath);
+      },
+      filename: function (req, file, callback) {
+        callback(null, file.fieldname + '-' + Date.now());
+      }
+    });
+    var upload = multer({ storage : storage}).single('userPhoto');
+    upload(req,res,function(err) {
+      // console.log('test');
+      if(err) {
+        // return res.send(err);
+        console.log(err);
+      }
+      // const host = 'https://face-mood.herokuapp.com'
+      const host = 'http://localhost:3000'
+      console.log(req.file.path);
+      axios.get(`${host}/api/get-result?url=${req.file.path}`)
+      .then(({data}) => {
+        res.send(data)
+      })
+      .catch(err => {
+        res.send(err)
+      })
+    });
   }
 }
