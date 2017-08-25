@@ -8,8 +8,10 @@ router.get('/quotes/:mood', apiController.getQuotes)
 router.get('/images/:collectionId', apiController.getImage)
 
 //get result menerima req.query.url = url dari gambar yang telah di upload
+
+router.get('/get-feed', apiController.getFeed)
+
 router.post('/get-result', apiController.getResult)
 
-router.post('/upload-image', apiController.upload)
 
 module.exports = router;

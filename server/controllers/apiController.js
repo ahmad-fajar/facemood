@@ -2,10 +2,15 @@
 require('dotenv').config()
 const axios = require('axios')
 const cheerio = require('cheerio')
+const jwt = require('jsonwebtoken')
+const multer = require('multer')
 const path = require('path')
-const multer  =   require('multer');
 // const host = 'https://face-mood.herokuapp.com'
 const host = 'http://localhost:3000'
+
+const Users = require('../models/Users')
+const Quotes = require('../models/Quotes')
+
 
 module.exports = {
   getExpression: (req, res) => {
@@ -91,6 +96,15 @@ module.exports = {
     // const host = 'https://face-mood.herokuapp.com'
     // const host = 'http://localhost:3000'
     // console.log(req.body);
+    const host = 'http://localhost:3000'
+    // console.log('header', req.headers);
+    let token = req.headers.usertoken
+    let fbid = ''
+    jwt.verify(token, 'Facemood', (e, decrypt) => {
+      console.log(decrypt)
+      fbid = decrypt.fbid
+    })
+
     axios.post(`${host}/api/expression`, req.body)
     .then(({data}) => {
       return Promise.all([
@@ -102,8 +116,36 @@ module.exports = {
       ])
     })
     .then(result => {
+      let queryResult = {
+        fbid  : fbid,
+        url   : result[0].data.url,
+        quotes: result[1].data.quotes,
+        author: result[1].data.author,
+        mood: result[2]
+      }
+
+      Quotes.create(queryResult)
+      .then(created => {
+        // console.log('created._id', created._id);
+        Users.findOne({fbid : fbid})
+        .then(user => {
+          console.log(user._id);
+          Users.update({
+            _id : user._id
+          }, {
+            $push : {
+              quoteslist : created._id
+            }
+          })
+          .then(pushed => console.log(pushed))
+        })
+        .catch(e => console.log(e))
+
+      })
+
+
       res.send({
-        url: result[0].data.url,
+        url   : result[0].data.url,
         quotes: result[1].data.quotes,
         author: result[1].data.author,
         mood: result[2]
@@ -114,33 +156,12 @@ module.exports = {
     })
   },
 
-  upload: (req, res) => {
-    // console.log('test');
-    var uploadPath = path.join(__dirname, '../images/')
-    var storage =   multer.diskStorage({
-      destination: function (req, file, callback) {
-        callback(null, uploadPath);
-      },
-      filename: function (req, file, callback) {
-        callback(null, file.fieldname + '-' + Date.now());
-      }
-    });
-    var upload = multer({ storage : storage}).single('userPhoto');
-    upload(req,res,function(err) {
-      // console.log('test');
-      if(err) {
-        // return res.send(err);
-        console.log(err);
-      }
-
-      console.log(req.file.path);
-      axios.get(`${host}/api/get-result?url=${req.file.path}`)
-      .then(({data}) => {
-        res.send(data)
-      })
-      .catch(err => {
-        res.send(err)
-      })
-    });
+  getFeed: (req, res) => {
+    Users.find()
+    .populate('quoteslist')
+    // .exec()
+    .then(feeds => res.send(feeds))
+    .catch(e => console.log(e))
   }
+
 }

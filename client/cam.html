@@ -43,7 +43,15 @@
         })
         .then(({data}) => {
           console.log(data[0]);
-          return axios.post('https://face-mood.herokuapp.com/api/get-result', data[0])
+          // return axios.post('http://localhost:3000/api/get-result', data[0], {
+          //   headers: {usertoken: localStorage.getItem('usertoken')}
+          // })
+          return axios({
+            method: 'post',
+            url: 'http://localhost:3000/api/get-result',
+            data: data[0],
+            headers: {usertoken: localStorage.getItem('usertoken')}
+          })
         })
         .then(({data}) => {
           console.log(data);
