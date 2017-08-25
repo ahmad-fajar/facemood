@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Schema   = mongoose.Schema;
 
 const UsersSchema = mongoose.Schema({
-  'name'     : {
+  'fbid'     : {
     type     : String,
     required : true
   },
@@ -15,9 +15,13 @@ const UsersSchema = mongoose.Schema({
     type     : String,
     required : true
   },
-  'fb_token' : {
+  'fbtoken'  : {
     type     : String,
     required : true
+  },
+  quoteslist : {
+    type     : Schema.Types.ObjectId,
+    ref      : 'quotes'
   }
 })
 
