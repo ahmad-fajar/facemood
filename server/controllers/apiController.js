@@ -20,8 +20,23 @@ module.exports = {
       let keys = Object.keys(scores)
 
       let mood = keys.reduce((a, b) => {return scores[a] > scores[b] ? a : b})
+      let collectionId
 
-      res.send({mood: mood})
+      switch (mood) {
+        case 'anger': collectionId = 926781; break;
+        case 'contempt': collectionId = 526331; break;
+        case 'disgust': collectionId = 844439; break;
+        case 'fear': collectionId = 263320; break;
+        case 'happiness': collectionId = 297157; break;
+        case 'neutral': collectionId = 140375; break;
+        case 'sadness': collectionId = 662074; break;
+        case 'surprise': collectionId = 932821; break;
+      }
+
+      res.send({
+        mood: mood,
+        collectionId: collectionId
+      })
     })
     .catch(err => {
       res.send(err)
@@ -44,6 +59,23 @@ module.exports = {
 
       let randIndex = Math.floor(Math.random()*tmp.length)
       res.send(tmp[randIndex])
+    })
+    .catch(err => {
+      res.send(err)
+    })
+  },
+
+  getImage: (req, res) => {
+    let collectionId = req.params.collectionId
+    // axios.get('http://localhost:3000/fake-unsplash')
+    axios.get(`https://api.unsplash.com/collections/${collectionId}/photos/?client_id=${process.env.UNSPLASH_API_KEY}&per_page=15`)
+    .then(result => {
+      let images = result.data
+      let randIndex = Math.floor(Math.random()*images.length)
+      let image = images[randIndex]
+      res.send({
+        url: image.urls.regular
+      })
     })
     .catch(err => {
       res.send(err)
