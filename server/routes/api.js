@@ -9,5 +9,6 @@ router.get('/images/:collectionId', apiController.getImage)
 
 //get result menerima req.query.url = url dari gambar yang telah di upload
 router.get('/get-result', apiController.getResult)
+router.get('/get-feed', apiController.getFeed)
 
 module.exports = router;

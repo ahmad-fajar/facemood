@@ -2,6 +2,10 @@
 require('dotenv').config()
 const axios = require('axios')
 const cheerio = require('cheerio')
+const jwt = require('jsonwebtoken')
+
+const Users = require('../models/Users')
+const Quotes = require('../models/Quotes')
 
 module.exports = {
   getExpression: (req, res) => {
@@ -85,22 +89,63 @@ module.exports = {
   getResult: (req, res) => {
     // console.log('req', req.query.url);
     const host = 'http://localhost:3000'
+    let token = req.headers.usertoken
+    let mood = ''
+    let fbid = ''
+    jwt.verify(token, 'Facemood', (e, decrypt) => {
+      console.log(decrypt.fbid)
+      fbid = decrypt.fbid
+    })
+    // console.log(fbid)
     axios.get(`${host}/api/expression?url=${req.query.url}`)
     .then(({data}) => {
+      mood = data.mood
       return Promise.all([
         axios.get(`${host}/api/images/${data.collectionId}`),
         axios.get(`${host}/api/quotes/${data.mood}`)
       ])
     })
     .then(result => {
-      res.send({
-        url: result[0].data.url,
+      let queryResult = {
+        fbid  : fbid,
+        url   : result[0].data.url,
         quotes: result[1].data.quotes,
-        author: result[1].data.author
+        author: result[1].data.author,
+        mood  : mood
+      }
+
+      Quotes.create(queryResult)
+      .then(created => {
+        // console.log('created._id', created._id);
+        Users.findOne({fbid : fbid})
+        .then(user => {
+          console.log(user._id);
+          Users.update({
+            _id : user._id
+          }, {
+            $push : {
+              quoteslist : created._id
+            }
+          })
+          .then(pushed => console.log(pushed))
+        })
+        .catch(e => console.log(e))
+
       })
+
+
+      res.send(result)
     })
     .catch(err => {
       res.send(err)
     })
+  },
+
+  getFeed: (req, res) => {
+    Users.find()
+    .populate('quoteslist')
+    // .exec()
+    .then(feeds => res.send(feeds))
+    .catch(e => console.log(e))
   }
 }

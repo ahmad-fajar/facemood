@@ -19,10 +19,10 @@ const UsersSchema = mongoose.Schema({
     type     : String,
     required : true
   },
-  quoteslist : {
+  'quoteslist' : [{
     type     : Schema.Types.ObjectId,
     ref      : 'quotes'
-  }
+  }]
 })
 
 const Users = mongoose.model('users', UsersSchema);
