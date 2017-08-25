@@ -11,18 +11,23 @@
     </script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   </head>
+
   <body>
     <div class="jumbotron jumbotron-fluid">
       <div class="container">
+        <div class="d-flex justify-content-center">
         <h1 class="display-3">Upload your Image</h1>
+        </div>
       </div>
     </div>
 
     <div class="container">
-      <form id="uploadForm" method="post">
-        <input id="userPhoto" type="file" name="userPhoto" accept="image/*"/>
-        <input type="submit" value="Upload Image" name="submit">
-      </form>
+      <div class="d-flex justify-content-center">
+        <form id="uploadForm" method="post">
+          <input id="userPhoto" type="file" name="userPhoto" accept="image/*"/>
+          <input type="submit" value="Upload Image" name="submit">
+        </form>
+      </div>  
     </div>
     <br>
     <div class = "container">
