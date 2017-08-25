@@ -12,23 +12,36 @@ exports.login = (req, res) => {
   FB.api('/me', {
     fields: ['id', 'name', 'email']
   }, function (response) {
-    // console.log('login response', response.name)
-    let userData = {
-      username  : response.name,
-      email     : response.email,
-      fbtoken   : fbtoken
-    }
-    User.create(userData)
-    .then(created => {
-      console.log(created)
-      console.log(userData);
-      // jwt.sign(payload, secret)
-      let jwttoken = jwt.sign(userData, 'Facemood')
-      // console.log('jwt',token)
-      let data = {username:response.name,jwttoken:jwttoken}
-      res.send(data)
+    // console.log('login response', response)
+
+    User.findOne({
+      fbid : response.id
     })
-    .catch(e => console.log(e))
+    .then(found => {
+      // console.log(found)
+      if (!found) {
+        console.log('ga ada usernya')
+        let userData = {
+          fbid      : response.id,
+          username  : response.name,
+          email     : response.email,
+          fbtoken   : fbtoken
+        }
+        User.create(userData)
+        .then(created => {
+          // jwt.sign(payload, secret)
+          let jwttoken = jwt.sign(userData, 'Facemood')
+          let data = {username:response.name,jwttoken:jwttoken}
+          res.send(data)
+        })
+      } else {
+        console.log('ada usernya')
+        let jwttoken = jwt.sign(userData, 'Facemood')
+        let data = {username:response.name,jwttoken:jwttoken}
+        res.send(data)
+      }
+    })
+
   })
 }
 
